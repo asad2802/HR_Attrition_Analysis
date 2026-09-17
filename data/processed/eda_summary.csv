@@ -1,0 +1,24 @@
+segment,value,attrition_rate,n
+Department,Human Resources,0.233,146
+Department,Research & Development,0.191,911
+Department,Sales,0.219,443
+OverTime,No,0.16,1076
+OverTime,Yes,0.317,404
+BusinessTravel,Non-Travel,0.151,139
+BusinessTravel,Travel_Frequently,0.276,275
+BusinessTravel,Travel_Rarely,0.192,1086
+MaritalStatus,Divorced,0.167,324
+MaritalStatus,Married,0.189,683
+MaritalStatus,Single,0.247,493
+Gender,Female,0.205,610
+Gender,Male,0.201,844
+Gender,Unknown,0.217,46
+TenureBand,0-1 yr,0.27,488
+TenureBand,2-3 yrs,0.226,327
+TenureBand,4-5 yrs,0.18,222
+TenureBand,6-10 yrs,0.16,306
+TenureBand,10+ yrs,0.064,157
+PayBand,Q1 (lowest),0.272,375
+PayBand,Q2,0.224,401
+PayBand,Q3,0.178,349
+PayBand,Q4 (highest),0.136,375

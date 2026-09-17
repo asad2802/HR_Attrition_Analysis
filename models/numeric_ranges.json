@@ -1,0 +1,107 @@
+{
+  "Age": {
+    "min": 18.0,
+    "max": 60.0,
+    "default": 40.0
+  },
+  "DistanceFromHome": {
+    "min": 1.0,
+    "max": 29.0,
+    "default": 15.0
+  },
+  "Education": {
+    "min": 1.0,
+    "max": 5.0,
+    "default": 3.0
+  },
+  "JobLevel": {
+    "min": 1.0,
+    "max": 5.0,
+    "default": 3.0
+  },
+  "YearsAtCompany": {
+    "min": 0.0,
+    "max": 35.0,
+    "default": 3.0
+  },
+  "YearsInCurrentRole": {
+    "min": 0.0,
+    "max": 20.0,
+    "default": 1.0
+  },
+  "YearsSinceLastPromotion": {
+    "min": 0.0,
+    "max": 15.0,
+    "default": 0.0
+  },
+  "YearsWithCurrManager": {
+    "min": 0.0,
+    "max": 32.0,
+    "default": 1.0
+  },
+  "NumCompaniesWorked": {
+    "min": 0.0,
+    "max": 9.0,
+    "default": 4.0
+  },
+  "TotalWorkingYears": {
+    "min": 0.0,
+    "max": 40.0,
+    "default": 11.0
+  },
+  "ManagerChangesLast2Yrs": {
+    "min": 0.0,
+    "max": 5.0,
+    "default": 0.0
+  },
+  "MonthlyIncome": {
+    "min": 5014.0,
+    "max": 25223.0,
+    "default": 13611.0
+  },
+  "PercentSalaryHike": {
+    "min": 11.0,
+    "max": 25.0,
+    "default": 18.0
+  },
+  "StockOptionLevel": {
+    "min": 0.0,
+    "max": 3.0,
+    "default": 2.0
+  },
+  "EnvironmentSatisfaction": {
+    "min": 1.0,
+    "max": 4.0,
+    "default": 2.0
+  },
+  "JobSatisfaction": {
+    "min": 1.0,
+    "max": 4.0,
+    "default": 3.0
+  },
+  "RelationshipSatisfaction": {
+    "min": 1.0,
+    "max": 4.0,
+    "default": 3.0
+  },
+  "WorkLifeBalance": {
+    "min": 1.0,
+    "max": 4.0,
+    "default": 2.0
+  },
+  "JobInvolvement": {
+    "min": 1.0,
+    "max": 4.0,
+    "default": 3.0
+  },
+  "PerformanceRating": {
+    "min": 3.0,
+    "max": 4.0,
+    "default": 3.0
+  },
+  "TrainingTimesLastYear": {
+    "min": 0.0,
+    "max": 6.0,
+    "default": 3.0
+  }
+}
