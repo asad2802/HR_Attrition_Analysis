@@ -151,7 +151,7 @@ st.markdown("""
 <div class="checker-strip"></div>
 """, unsafe_allow_html=True)
 
-tab1, tab2, tab3 = st.tabs(["The board", "Insights", "About"])
+tab1, tab2, tab3, tab4 = st.tabs(["The board", "Bulk upload", "Insights", "About"])
 
 # =================================================================
 # TAB 1: PREDICT
@@ -282,6 +282,111 @@ with tab1:
 # TAB 2: INSIGHTS
 # =================================================================
 with tab2:
+    st.subheader("Upload a roster")
+    st.caption("Upload a CSV of employees to get a risk score and top drivers for "
+               "everyone at once — useful for scanning a whole team or department.")
+
+    with st.expander("Need the right format? Download a template"):
+        template_cols = cat_cols + num_cols
+        template_row = {c: cat_options[c][0] for c in cat_cols}
+        template_row.update({c: num_ranges[c]["default"] for c in num_cols})
+        template_df = pd.DataFrame([template_row])[template_cols]
+        st.dataframe(template_df, use_container_width=True)
+        st.download_button(
+            "Download template CSV", template_df.to_csv(index=False),
+            file_name="hrhelp_upload_template.csv", mime="text/csv")
+
+    uploaded = st.file_uploader("Upload employee CSV", type=["csv"])
+
+    if uploaded is not None:
+        try:
+            up_df = pd.read_csv(uploaded)
+        except Exception as e:
+            st.error(f"Could not read that file: {e}")
+            up_df = None
+
+        if up_df is not None:
+            missing = [c for c in feature_cols if c not in up_df.columns]
+            if missing:
+                st.error("This file is missing required columns: " + ", ".join(missing) +
+                          ". Download the template above to see the exact column names needed.")
+            else:
+                work_df = up_df.copy()
+                unseen_report = {}
+
+                # Safe-encode categoricals: unseen category values fall back to a
+                # known default rather than crashing, and get flagged for the user
+                for c in cat_cols:
+                    le = encoders[c]
+                    known = set(le.classes_)
+                    vals = work_df[c].astype(str)
+                    unseen_vals = vals[~vals.isin(known)].unique().tolist()
+                    if unseen_vals:
+                        unseen_report[c] = unseen_vals
+                    fallback = le.classes_[0]
+                    cleaned = vals.apply(lambda v: v if v in known else fallback)
+                    work_df[c] = le.transform(cleaned)
+
+                # Numeric columns: coerce, fill any bad/missing values with the
+                # training median rather than dropping the row
+                for c in num_cols:
+                    work_df[c] = pd.to_numeric(work_df[c], errors="coerce")
+                    if work_df[c].isna().any():
+                        work_df[c] = work_df[c].fillna(num_ranges[c]["default"])
+
+                X_batch = work_df[feature_cols]
+
+                if unseen_report:
+                    msg = "; ".join(f"{k}: {', '.join(v)}" for k, v in unseen_report.items())
+                    st.warning(f"Some values weren't in the training data and were treated "
+                               f"as the nearest known category — {msg}")
+
+                probs = model.predict_proba(X_batch)[:, 1]
+                shap_vals_batch = explainer.shap_values(X_batch)
+                if isinstance(shap_vals_batch, list):
+                    sv_batch = shap_vals_batch[1]
+                elif shap_vals_batch.ndim == 3:
+                    sv_batch = shap_vals_batch[:, :, 1]
+                else:
+                    sv_batch = shap_vals_batch
+
+                results = up_df.copy()
+                results["Risk score"] = (probs * 100).round(1)
+                results["Verdict"] = pd.cut(
+                    probs, bins=[-0.01, 0.3, 0.5, 1.01],
+                    labels=["Solid position", "In check", "Checkmate risk"])
+
+                top_drivers = []
+                for i in range(len(X_batch)):
+                    row_sv = sv_batch[i]
+                    top_idx = np.argsort(np.abs(row_sv))[::-1][:2]
+                    parts = []
+                    for idx in top_idx:
+                        direction = "raises" if row_sv[idx] > 0 else "lowers"
+                        parts.append(f"{feature_cols[idx]} ({direction} risk)")
+                    top_drivers.append("; ".join(parts))
+                results["Top drivers"] = top_drivers
+
+                results = results.sort_values("Risk score", ascending=False)
+
+                st.divider()
+                n_high = (results["Verdict"] == "Checkmate risk").sum()
+                n_mod = (results["Verdict"] == "In check").sum()
+                mcol1, mcol2, mcol3 = st.columns(3)
+                mcol1.metric("Employees scanned", len(results))
+                mcol2.metric("Checkmate risk", int(n_high))
+                mcol3.metric("In check", int(n_mod))
+
+                st.dataframe(results, use_container_width=True)
+                st.download_button(
+                    "Download results CSV", results.to_csv(index=False),
+                    file_name="hrhelp_bulk_risk_results.csv", mime="text/csv",
+                    type="primary")
+
+# =================================================================
+# TAB 3: INSIGHTS
+# =================================================================
+with tab3:
     st.subheader("Model performance")
     mcol1, mcol2 = st.columns(2)
     with mcol1:
@@ -304,9 +409,9 @@ with tab2:
     st.markdown(load_insights_report())
 
 # =================================================================
-# TAB 3: ABOUT
+# TAB 4: ABOUT
 # =================================================================
-with tab3:
+with tab4:
     st.subheader("About HRHELP")
     st.markdown("""
 HRHELP reads the board before a piece is lost: it estimates the odds that a
